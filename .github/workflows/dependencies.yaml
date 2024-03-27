@@ -1,0 +1,43 @@
+---
+name: "♻️ Update dependencies"
+
+# yamllint disable-line rule:truthy
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * MON"
+
+jobs:
+  update-dependencies:
+    name: "Update Python dependencies"
+    runs-on: ubuntu-latest
+    permissions:
+      # IMPORTANT: mandatory to raise the PR
+      id-token: write
+      pull-requests: write
+      repository-projects: write
+      contents: write
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: "Update Python dependencies"
+        uses: ModeSevenIndustrialSolutions/update-deps-action@v1
+        with:
+          sign-off-commit: "true"
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Chore: Update dependencies and pdm.lock [skip ci]"
+          pr-title: "Update Python module dependencies"
+          update-strategy: eager
+          export-reqs: "true"
+          # Whether to install PDM plugins before update
+          install-plugins: "false"
